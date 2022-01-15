@@ -130,7 +130,7 @@ impl From<InvalidHeaderValue> for ProxyError {
     }
 }
 
-fn is_hop_header(name: &str) -> bool {
+pub fn is_hop_header(name: &str) -> bool {
     use unicase::Ascii;
 
     // A list of the headers, using `unicase` to help us compare without
@@ -155,7 +155,7 @@ fn is_hop_header(name: &str) -> bool {
 /// Returns a clone of the headers without the [hop-by-hop headers].
 ///
 /// [hop-by-hop headers]: http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html
-fn remove_hop_headers(headers: &HeaderMap<HeaderValue>) -> HeaderMap<HeaderValue> {
+pub fn remove_hop_headers(headers: &HeaderMap<HeaderValue>) -> HeaderMap<HeaderValue> {
     let mut result = HeaderMap::new();
     for (k, v) in headers.iter() {
         if !is_hop_header(k.as_str()) {
@@ -165,12 +165,12 @@ fn remove_hop_headers(headers: &HeaderMap<HeaderValue>) -> HeaderMap<HeaderValue
     result
 }
 
-fn create_proxied_response<B>(mut response: Response<B>) -> Response<B> {
+pub fn create_proxied_response<B>(mut response: Response<B>) -> Response<B> {
     *response.headers_mut() = remove_hop_headers(response.headers());
     response
 }
 
-fn forward_uri<B>(forward_url: &str, req: &Request<B>) -> Result<Uri, InvalidUri> {
+pub fn forward_uri<B>(forward_url: &str, req: &Request<B>) -> Result<Uri, InvalidUri> {
     let forward_uri = match req.uri().query() {
         Some(query) => format!("{}{}?{}", forward_url, req.uri().path(), query),
         None => format!("{}{}", forward_url, req.uri().path()),
@@ -179,7 +179,7 @@ fn forward_uri<B>(forward_url: &str, req: &Request<B>) -> Result<Uri, InvalidUri
     Uri::from_str(forward_uri.as_str())
 }
 
-fn create_proxied_request<B>(
+pub fn create_proxied_request<B>(
     client_ip: IpAddr,
     forward_url: &str,
     mut request: Request<B>,
